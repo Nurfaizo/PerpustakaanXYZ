@@ -1,0 +1,270 @@
+import java.util.ArrayList;
+import java.time.LocalDate;
+
+class Notifikasi {
+   private String pesan;
+
+    public Notifikasi(String pesan) {
+        this.pesan = pesan;
+    }
+
+    public void kirimNotifikasi(Anggota_Perpustakaan untuk, ArrayList<Transaksi_Peminjam> pinjam) {
+        int banyak =0;
+        
+         for (Transaksi_Peminjam transaksi : pinjam) {
+            if (!transaksi.isDikembalikan()) {
+                banyak++;
+            }
+        }
+         System.out.println(pesan);
+         System.out.println(" ");
+         System.out.println(untuk.getNama()+(banyak>0?" Anda memiliki "+banyak+" Buku yang belum dikembalikan":"Semua buku telah dikembalika"));
+    }
+}
+
+class Anggota_Perpustakaan {
+    private String nama,nomor_anggota, alamat;
+    ArrayList<Transaksi_Peminjam> riwayat_pinjam = new ArrayList<>();
+    ArrayList<Transaksi_Kembali> riwayat_kembali = new ArrayList<>();
+
+    public Anggota_Perpustakaan(String nama, String nomor_anggota, String alamat) {
+        this.nama = nama;
+        this.nomor_anggota = nomor_anggota;
+        this.alamat = alamat;
+    }
+
+    public String getNama() {
+        return nama;
+    }
+
+    public void setNama(String nama) {
+        this.nama = nama;
+    }
+
+    public String getNomor_anggota() {
+        return nomor_anggota;
+    }
+
+    public void setNomor_anggota(String nomor_anggota) {
+        this.nomor_anggota = nomor_anggota;
+    }
+
+    public String getAlamat() {
+        return alamat;
+    }
+
+    public void setAlamat(String alamat) {
+        this.alamat = alamat;
+    }
+
+    public ArrayList<Transaksi_Peminjam> getRiwayat_pinjam() {
+        return riwayat_pinjam;
+    }
+
+    public void addpinjam(Transaksi_Peminjam riwayat_pinjam) {
+        this.riwayat_pinjam.add(riwayat_pinjam);
+    }
+
+    public ArrayList<Transaksi_Kembali> getRiwayat_kembali() {
+        return riwayat_kembali;
+    }
+
+    public void addkembali(Transaksi_Kembali riwayat_kembali) {
+        this.riwayat_kembali.add(riwayat_kembali);
+    }
+    public void ubah_anggota(String nama,String nomor_anggota, String alamat){
+        this.nama=nama;
+        this.alamat=alamat;
+        this.nomor_anggota=nomor_anggota;
+    }    
+}
+
+class Transaksi_Peminjam {
+    private Buku buku;
+    private LocalDate tanggalPeminjaman;
+    private int durasiPeminjaman;
+    private boolean dikembalikan;
+
+    public Transaksi_Peminjam(Buku buku, LocalDate tanggalPeminjaman, int durasiPeminjaman) {
+        this.buku = buku;
+        this.tanggalPeminjaman = tanggalPeminjaman;
+        this.durasiPeminjaman = durasiPeminjaman;
+        this.dikembalikan=false;
+    }
+
+    public Buku getBuku() {
+        return this.buku;
+    }
+
+    public LocalDate getTanggalPeminjaman() {
+        return this.tanggalPeminjaman;
+    }
+
+    public int getDurasiPeminjaman() {
+        return this.durasiPeminjaman;
+    }
+
+    public boolean isDikembalikan() {
+        return dikembalikan;
+    }
+
+    public void setDikembalikan(boolean dikembalikan) {
+        this.dikembalikan = dikembalikan;
+    }
+    
+    
+}
+
+
+class Buku {
+     private String judul;
+    private String pengarang;
+    private String nomorISBN;
+    private boolean statusketersediaan;
+    private ArrayList<Transaksi_Peminjam> riwayatPeminjaman = new ArrayList<>();
+    
+    
+    public Buku(String judul,String pengarang,String nomorISBN,boolean statusketersediaan){
+        this.judul = judul;
+        this.pengarang = pengarang;
+        this.nomorISBN = nomorISBN;
+        this.statusketersediaan=statusketersediaan;
+    }
+
+    public String getJudul() {
+        return judul;
+    }
+
+    public void setJudul(String judul) {
+        this.judul = judul;
+    }
+
+    public String getPengarang() {
+        return pengarang;
+    }
+
+    public void setPengarang(String pengarang) {
+        this.pengarang = pengarang;
+    }
+
+    public String getNomorISBN() {
+        return nomorISBN;
+    }
+
+    public void setNomorISBN(String nomorISBN) {
+        this.nomorISBN = nomorISBN;
+    }
+
+    public boolean isStatusketersediaan() {
+        return statusketersediaan;
+    }
+
+    public void setStatusketersediaan(boolean statusketersediaan) {
+        this.statusketersediaan = statusketersediaan;
+    }
+    
+    public boolean checketersediaan(){
+        return statusketersediaan;
+    }
+    public void pinjamBuku(Anggota_Perpustakaan anggota, int durasi){
+        if (statusketersediaan) {
+            Transaksi_Peminjam transaksi = new Transaksi_Peminjam(this, LocalDate.now(), durasi);
+            riwayatPeminjaman.add(transaksi);
+            statusketersediaan = false;
+            anggota.addpinjam(transaksi);
+            System.out.println("Buku Berhasil Dipinjam");
+        } else {
+            System.out.println("Maaf, buku " + judul + " sedang tidak tersedia.");
+        }
+    }
+    public void kembalibuku(Anggota_Perpustakaan anggota, Transaksi_Peminjam transaksiPeminjaman){
+         if (!statusketersediaan) {
+            Transaksi_Kembali transaksiPengembalian = new Transaksi_Kembali(transaksiPeminjaman, LocalDate.now());
+            transaksiPeminjaman.setDikembalikan(true);
+            anggota.addkembali(transaksiPengembalian);
+            statusketersediaan = true;
+            System.out.println("Buku Telah Dikembalikan");
+        } else {
+            System.out.println("Buku " + judul + "Buku tersebut sudah dikembalikan");
+        }
+    }
+    public void ubahDataBuku(String judulBaru, String pengarangBaru, String nomorISBNBaru) {
+        this.judul = judulBaru;
+        this.pengarang = pengarangBaru;
+        this.nomorISBN = nomorISBNBaru;
+    }
+}
+
+class Admin {
+    private boolean aksesManajemenAnggota;
+    private boolean aksesManajemenBuku;
+    private boolean aksesLaporanAktivitas;
+
+    public void kelolaAnggota(Anggota_Perpustakaan perpus, String nama, String nomor, String alamat) {
+        perpus.ubah_anggota(nama, nomor, alamat);
+        System.out.println("Data anggota berubah");
+        System.out.println("");
+    }
+
+    public void kelolaBuku(Buku buku,String judul,String ISBN,String Pengarang) {
+        buku.ubahDataBuku(judul, Pengarang, ISBN);
+        System.out.println("Data Buku sudah berubah ");
+        System.out.println("");
+    }
+
+    public void generateLaporan(Anggota_Perpustakaan perpus) {
+        System.out.println("Riwayat Peminjaman " + perpus.getNama() + ":");
+        for (Transaksi_Peminjam transaksi : perpus.getRiwayat_pinjam()) {
+            System.out.println("Buku: " + transaksi.getBuku().getJudul() +
+                    ", Tanggal Peminjaman: " + transaksi.getTanggalPeminjaman() +
+                    ", Durasi Peminjaman: " + transaksi.getDurasiPeminjaman() + " hari" +
+                    ", Status: " + (transaksi.isDikembalikan() ? "Sudah dikembalikan" : "Belum dikembalikan"));
+            System.out.println("");
+        }    
+    }
+}
+
+class Transaksi_Kembali {
+    private Transaksi_Peminjam transaksiPeminjaman;
+    private LocalDate tanggalPengembalian;
+
+    public Transaksi_Kembali(Transaksi_Peminjam transaksiPeminjaman, LocalDate tanggalPengembalian) {
+        this.transaksiPeminjaman = transaksiPeminjaman;
+        this.tanggalPengembalian = tanggalPengembalian;
+    }
+
+    public Transaksi_Peminjam getTransaksiPeminjaman() {
+        return transaksiPeminjaman;
+    }
+
+    public LocalDate getTanggalPengembalian() {
+        return tanggalPengembalian;
+    }
+}
+
+public class Studi_Kasus {
+
+    
+    public static void main(String[] args) {
+        Buku buku1 = new Buku("Logika Pemrograman Java", "Leo Nardo", "ISBN001",true);
+        Buku buku2 = new Buku("Belajar Jawa", "M Nurfaiz Satriani Azra", "ISBN002",true);
+
+        Anggota_Perpustakaan anggota1 = new Anggota_Perpustakaan("Nama Anggota 1", "A001", "Alamat Anggota 1");
+        Admin admin = new Admin();
+       admin.kelolaAnggota(anggota1,"Faiz","A02","Palapa");
+       admin.kelolaBuku(buku1, "Belajar Java", "ISBN001", "Leo Mardo");
+
+        buku1.pinjamBuku(anggota1, 7);
+        buku2.pinjamBuku(anggota1, 14);
+
+        Transaksi_Peminjam transaksiPengembalian = anggota1.getRiwayat_pinjam().get(0);
+        buku1.kembalibuku(anggota1, transaksiPengembalian);
+
+        Notifikasi notif =  new Notifikasi("Pesan dari admin");
+        notif.kirimNotifikasi(anggota1,anggota1.getRiwayat_pinjam());
+        admin.generateLaporan(anggota1);
+    }
+    
+}
+
+
